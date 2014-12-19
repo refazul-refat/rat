@@ -373,31 +373,39 @@ int main()
 	//cout<<RAT[2]<<endl;
 	//cout<<RAT[3]<<endl;
 	//cout<<dec;
-	//mixItUp();
-	const clock_t begin_time = clock();
-	unsigned char BUFFER[16],c;
-	int it=0,blocks=0,threshold=10*1024*64;
+	for(int M=4;M<=4;M++){
+	
+	int it=0,index=0,blocks=0,threshold=M*1024*64,max=M*1024*1024;
+	unsigned char* BUFFER=new unsigned char[max];
+	unsigned char c;
 	FILE* fr=fopen("plain.txt","r");
 	FILE* fw=fopen("cipher.txt","w");
 	while(true){
 		c=fgetc(fr);
-		if(c=='$' || blocks>threshold)break;
-		BUFFER[it]=c;
+		if(blocks>threshold)break;
+		BUFFER[index++]=c;
 
-		if(it==15){
-			//protectedEncrypt(&BUFFER);
+		if(it==15)
 			blocks++;
-			encrypt(&BUFFER);
-			for(int i=0;i<16;i++)
-				fputc(BUFFER[i],fw);
-		}
 		it=(it+1)%16;
 	}
 	fclose(fw);
 	fclose(fr);
-	std::cout << dec;
-	//std::cout << it << " " << blocks << endl;
-	std::cout << float( clock () - begin_time ) /  CLOCKS_PER_SEC<<endl;
+
+	//mixItUp();
+
+		for(int z=0;z<10;z++){
+			const clock_t begin_time = clock();
+			std::cout << "Starting..." <<endl;
+
+			for(index=0;index<max;index+=16){
+				encrypt(&BUFFER[index]);
+			}
+
+			std::cout << dec;
+			std::cout << (z+1) << " " << float( clock () - begin_time ) /  CLOCKS_PER_SEC<<endl;
+		}
+	}
 	return 0;
 
 	unsigned char PLAIN[]=
