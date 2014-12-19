@@ -164,9 +164,9 @@ void encrypt(void* v)
 	for(int i=0;i<16;i++)
 	{
 		r1[i]=r0[i] ^ KEY[0][i];
-		cout<<hex<<(unsigned int)r1[i]<<" ";
+		//cout<<hex<<(unsigned int)r1[i]<<" ";
 	}
-	cout<<endl;
+	//cout<<endl;
 
 	delete[] r0;
 	
@@ -197,9 +197,9 @@ void encrypt(void* v)
 		for(int j=0;j<16;j++)
 		{
 			r1[j]=temp[j];
-			cout<<hex<<(unsigned int)r1[j]<<" ";
+			//cout<<hex<<(unsigned int)r1[j]<<" ";
 		}
-		cout<<endl;
+		//cout<<endl;
 
 		delete[] temp;
 	}
@@ -228,9 +228,10 @@ void encrypt(void* v)
 	for(int j=0;j<16;j++)
 	{
 		r1[j]=temp[j];
-		cout<<hex<<(unsigned int)r1[j]<<" ";
+		*((unsigned char*)v+j)=r1[j];
+		//cout<<hex<<(unsigned int)r1[j]<<" ";
 	}
-	cout<<endl<<endl<<endl;
+	//cout<<endl<<endl<<endl;
 
 	delete[] temp;
 }
@@ -266,9 +267,9 @@ void protectedEncrypt(void* v)
 	for(int i=0;i<16;i++)
 	{
 		r1[i]=r0[i] ^ KEY[0][i];
-		cout<<hex<<(unsigned int)r1[i]<<" ";
+		//cout<<hex<<(unsigned int)r1[i]<<" ";
 	}
-	cout<<endl;
+	//cout<<endl;
 
 	delete[] r0;
 	
@@ -299,9 +300,9 @@ void protectedEncrypt(void* v)
 		for(int j=0;j<16;j++)
 		{
 			r1[j]=temp[j];
-			cout<<hex<<(unsigned int)r1[j]<<" ";
+			//cout<<hex<<(unsigned int)r1[j]<<" ";
 		}
-		cout<<endl;
+		//cout<<endl;
 
 		delete[] temp;
 	}
@@ -330,7 +331,8 @@ void protectedEncrypt(void* v)
 	for(int j=0;j<16;j++)
 	{
 		r1[j]=temp[j];
-		cout<<hex<<(unsigned int)r1[j]<<" ";
+		*((unsigned char*)v+j)=r1[j];
+		//cout<<hex<<(unsigned int)r1[j]<<" ";
 	}
 
 	delete[] temp;
@@ -366,18 +368,43 @@ int main()
 	generateRoundKeys(&K);
 	
 	//cout<<dec;
-	cout<<RAT[0]<<endl;
-	cout<<RAT[1]<<endl;
-	cout<<RAT[2]<<endl;
-	cout<<RAT[3]<<endl;
-	cout<<hex;
+	//cout<<RAT[0]<<endl;
+	//cout<<RAT[1]<<endl;
+	//cout<<RAT[2]<<endl;
+	//cout<<RAT[3]<<endl;
+	//cout<<dec;
+	//mixItUp();
+	const clock_t begin_time = clock();
+	unsigned char BUFFER[16],c;
+	int it=0,blocks=0,threshold=10*1024*64;
+	FILE* fr=fopen("plain.txt","r");
+	FILE* fw=fopen("cipher.txt","w");
+	while(true){
+		c=fgetc(fr);
+		if(c=='$' || blocks>threshold)break;
+		BUFFER[it]=c;
+
+		if(it==15){
+			//protectedEncrypt(&BUFFER);
+			blocks++;
+			encrypt(&BUFFER);
+			for(int i=0;i<16;i++)
+				fputc(BUFFER[i],fw);
+		}
+		it=(it+1)%16;
+	}
+	fclose(fw);
+	fclose(fr);
+	std::cout << dec;
+	//std::cout << it << " " << blocks << endl;
+	std::cout << float( clock () - begin_time ) /  CLOCKS_PER_SEC<<endl;
+	return 0;
+
 	unsigned char PLAIN[]=
 	{
 		0x01,0x23,0x45,0x67,0x89,0xab,0xcd,0xef,0xfe,0xdc,0xba,0x98,0x76,0x54,0x32,0x10
 	};
 	encrypt(&PLAIN);
-
-	mixItUp();
 	protectedEncrypt(&PLAIN);
 	
 	
